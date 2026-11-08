@@ -1,0 +1,777 @@
+{% raw %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Wayfinder</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;500;600&display=swap">
+    <style>
+
+        :root{
+            --bg:#eef3f1;--panel:#fff;--ink:#0b2b36;--mute:#5b727c;--line:#d6e2e0;
+            --sea:#9fd0d3;--land:#f6eedb;--pin:#e0553d;--acc:#f4b73f;--accink:#2a1d00;
+            --r:18px;--r-sm:12px;
+            --shadow:0 1px 0 rgba(11,43,54,.04),0 18px 40px -22px rgba(11,43,54,.45);
+            --c-culture:#6b5bb5;--c-heritage:#a8642e;--c-landmarks:#d1493b;--c-nature:#2f8f6b;
+            --c-beach:#1b8fb5;--c-family:#d9822b;--c-adventure:#c23a78;--c-shopping:#7a8a2e;
+            --pat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' fill='none' stroke='%230b2b36' stroke-opacity='.07' stroke-width='1.2'%3E%3Cpath d='M40 6l9 25 25 9-25 9-9 25-9-25-25-9 25-9z'/%3E%3Ccircle cx='0' cy='0' r='6'/%3E%3Ccircle cx='80' cy='0' r='6'/%3E%3Ccircle cx='0' cy='80' r='6'/%3E%3Ccircle cx='80' cy='80' r='6'/%3E%3C/svg%3E");
+            color-scheme:light;box-sizing:border-box;
+            padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+        }
+        @media (prefers-color-scheme:dark){
+            :root:not([data-theme="light"]){
+                --bg:#081b24;--panel:#10303c;--ink:#e8f3f3;--mute:#93b0bb;--line:#21424f;
+                --sea:#0f3a4a;--land:#2c3b3b;--pin:#ff7a66;--acc:#f0b43a;color-scheme:dark;
+                --pat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' fill='none' stroke='%23ffffff' stroke-opacity='.05' stroke-width='1.2'%3E%3Cpath d='M40 6l9 25 25 9-25 9-9 25-9-25-25-9 25-9z'/%3E%3Ccircle cx='0' cy='0' r='6'/%3E%3Ccircle cx='80' cy='0' r='6'/%3E%3Ccircle cx='0' cy='80' r='6'/%3E%3Ccircle cx='80' cy='80' r='6'/%3E%3C/svg%3E");
+            }
+            :root:not([data-theme="light"]) header::before{background:#6d5a3a}
+        }
+        :root[data-theme="dark"]{
+            --bg:#081b24;--panel:#10303c;--ink:#e8f3f3;--mute:#93b0bb;--line:#21424f;
+            --sea:#0f3a4a;--land:#2c3b3b;--pin:#ff7a66;--acc:#f0b43a;color-scheme:dark;
+            --pat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' fill='none' stroke='%23ffffff' stroke-opacity='.05' stroke-width='1.2'%3E%3Cpath d='M40 6l9 25 25 9-25 9-9 25-9-25-25-9 25-9z'/%3E%3Ccircle cx='0' cy='0' r='6'/%3E%3Ccircle cx='80' cy='0' r='6'/%3E%3Ccircle cx='0' cy='80' r='6'/%3E%3Ccircle cx='80' cy='80' r='6'/%3E%3C/svg%3E");
+        }
+        :root[data-theme="dark"] header::before{background:#6d5a3a}
+
+        /* ============ Base ============ */
+        *{box-sizing:border-box}
+        html{scroll-padding-top:env(safe-area-inset-top,0px)}
+        body{
+            margin:0;color:var(--ink);font:400 15px/1.6 Figtree,system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+            background:radial-gradient(1200px 500px at 85% -10%,color-mix(in srgb,var(--acc) 22%,transparent),transparent 60%),var(--bg);
+        }
+        body::before{
+            content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+            background:var(--pat),
+            radial-gradient(800px 480px at 6% 104%,color-mix(in srgb,var(--sea) 60%,transparent),transparent 70%),
+            radial-gradient(900px 520px at 94% -6%,color-mix(in srgb,var(--acc) 28%,transparent),transparent 65%);
+        }
+        body::after{
+            content:"";position:fixed;left:-5%;right:-5%;bottom:0;height:24vh;z-index:-1;pointer-events:none;
+            background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--acc) 16%,transparent));
+            clip-path:polygon(0 68%,14% 50%,30% 62%,48% 40%,64% 58%,80% 38%,100% 54%,100% 100%,0 100%);
+        }
+        h1,h2{font-family:"Bricolage Grotesque",Figtree,sans-serif;margin:0;letter-spacing:-.025em}
+        h2{font-size:18px;font-weight:600}
+        ul{list-style:none;margin:0;padding:0}
+        .tag{color:var(--mute);font-size:13px;line-height:1.45}
+        .tag b{color:var(--ink);background:color-mix(in srgb,var(--acc) 55%,transparent);padding:1px 7px;border-radius:99px}
+        .empty{color:var(--mute);padding:16px}
+        .count{margin:0 2px 8px;color:var(--mute);font-size:13px;font-weight:600}
+        :is(button,select,input,a,circle):focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+
+        /* ============ Header ============ */
+        header{
+            position:relative;overflow:hidden;isolation:isolate;
+            width:min(1160px,calc(100% - 40px));margin:20px auto 16px;
+            padding:clamp(28px,5vw,56px) clamp(22px,4vw,48px) clamp(26px,4.5vw,50px);
+            border-radius:28px;color:#fff;box-shadow:var(--shadow);
+            background:
+                    radial-gradient(circle at 85% 38%,#ffd36b 0 46px,rgba(255,211,107,.35) 47px 78px,rgba(255,211,107,.12) 79px 120px,transparent 121px),
+                    linear-gradient(180deg,#0b2b36 0%,#11495b 62%,#1a6b7a 100%);
+        }
+        header::before,header::after{content:"";position:absolute;left:-5%;right:-5%;bottom:-1px;z-index:-1;pointer-events:none}
+        header::before{height:46%;background:#e9c98b;opacity:.9;clip-path:polygon(0 70%,12% 52%,26% 62%,42% 40%,58% 58%,74% 36%,88% 54%,100% 44%,100% 100%,0 100%)}
+        header::after{height:32%;background:var(--bg);clip-path:polygon(0 62%,16% 44%,34% 60%,52% 38%,70% 58%,86% 42%,100% 56%,100% 100%,0 100%)}
+        header h1{font-size:clamp(40px,8vw,84px);font-weight:800;line-height:.95;letter-spacing:-.045em;max-width:11ch;text-wrap:balance}
+        header p{font-size:clamp(16px,2vw,19px);max-width:44ch;margin:16px 0 0;color:rgba(255,255,255,.88);padding-bottom:clamp(40px,8vw,90px)}
+        header .stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+        header .stats span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(6px);border-radius:99px;padding:5px 14px;font-size:14px}
+        header .stats b{font-weight:700}
+
+        /* ============ Search and filters ============ */
+        .bar{
+            display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+            width:min(1160px,calc(100% - 40px));margin:0 auto 14px;padding:12px 14px;
+            background:color-mix(in srgb,var(--panel) 88%,transparent);
+            backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);
+            border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);
+        }
+        .bar label{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--mute);font-size:13px}
+        select,input{
+            font:inherit;font-weight:500;color:var(--ink);background:var(--panel);min-width:0;
+            border:1.5px solid var(--line);border-radius:var(--r-sm);padding:10px 14px;transition:border-color .15s;
+        }
+        select:hover,input:hover{border-color:var(--mute)}
+        select:focus,input:focus{border-color:var(--ink)}
+        input[type=search]{
+            flex:1 1 220px;padding-left:40px;
+            background:var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%235b727c' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='8' cy='8' r='6'/%3E%3Cpath d='m13 13 4 4'/%3E%3C/svg%3E") no-repeat 14px center;
+        }
+        .chips{display:flex;flex-wrap:nowrap;gap:8px;width:100%;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px;margin:0 -2px}
+        .chips::-webkit-scrollbar{display:none}
+        .chip{
+            flex:none;font:inherit;font-weight:600;font-size:14px;cursor:pointer;color:var(--ink);background:var(--panel);
+            border:1.5px solid var(--line);border-radius:99px;padding:7px 16px;transition:background .15s,color .15s,border-color .15s;
+        }
+        .chip:hover{border-color:var(--ink)}
+        .chip[aria-pressed=true]{background:var(--ink);color:var(--panel);border-color:var(--ink);box-shadow:0 6px 14px -8px var(--ink)}
+
+
+        /* ============ Layout ============ */
+        .pw,main{max-width:1200px;margin:auto;padding:0 20px}
+        .pw{padding-bottom:12px}
+        main{display:grid;grid-template-columns:1fr;gap:20px;padding-bottom:24px}
+        @media(min-width:900px){
+            main{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:start}
+            .mapwrap{position:sticky;top:12px}
+        }
+
+        /* ============ Cards ============ */
+        .prefs,.trip{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+        .prefs{padding:20px 22px}
+        .trip{padding:18px 20px;margin-top:12px}
+        .prefs h2{font-size:22px}
+        .trip h2{font-size:20px}
+        .trip ol,.day ol{margin:6px 0;padding-left:22px}
+        .trip li::marker{color:var(--pin);font-weight:700}
+        .bar2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;align-items:end;margin-top:16px}
+        .bar2 label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:12.5px;color:var(--mute)}
+        .bar2 select{width:100%}
+        .tag select{font-size:13px;color:var(--mute)}
+        .day{border-top:1px dashed var(--line);padding:14px 0}
+        .day h2{font-size:17px;margin-bottom:2px}
+        .mini li{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+        .mini li>span{flex:1}
+        .links li{padding:7px 0;border-bottom:1px solid var(--line)}
+        .links li:last-child{border-bottom:0}
+        .links a{font-weight:600;color:var(--ink);text-decoration-thickness:2px;text-underline-offset:3px;text-decoration-color:var(--acc)}
+        .src{font-size:13px;color:var(--ink);text-decoration:underline}
+        footer{max-width:1200px;margin:6px auto 0;padding:18px 20px 28px;border-top:1px solid var(--line);color:var(--mute);font-size:12.5px;line-height:1.5}
+
+        /* ============ Buttons ============ */
+        .btn{
+            display:inline-block;border:0;border-radius:99px;padding:9px 18px;margin:6px 8px 0 0;
+            font:600 14px Figtree,sans-serif;text-decoration:none;cursor:pointer;transition:transform .12s,filter .15s;
+        }
+        .btn:hover{filter:brightness(1.07)}
+        .btn:active{transform:translateY(1px)}
+        .go{background:var(--ink);color:var(--panel)}
+        .add{background:var(--acc);color:var(--accink)}
+        .sv{background:var(--panel);color:var(--ink);border:1.5px solid var(--line)}
+        #plan-btn{
+            grid-column:1/-1;justify-self:start;margin:0;padding:13px 26px;font-size:16px;
+            box-shadow:0 12px 24px -12px var(--acc);
+        }
+        @media(min-width:900px){#plan-btn{grid-column:auto;justify-self:stretch}}
+        .x{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:4px 10px;font:inherit;font-size:13px;cursor:pointer;transition:border-color .15s}
+        .x:hover{border-color:var(--ink)}
+        .heart{
+            min-width:44px;min-height:44px;margin-left:auto;padding:0 2px;border:0;background:none;
+            color:var(--pin);font-size:24px;line-height:1;cursor:pointer;transition:transform .15s;
+        }
+        .heart:hover{transform:scale(1.2)}
+
+        /* ============ Map ============ */
+        .mapwrap{position:relative;margin:6px;overflow:hidden;background:var(--sea);border-radius:24px;box-shadow:0 0 0 6px var(--panel),var(--shadow)}
+        svg{display:block;width:100%;height:auto}
+                #map{cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none}
+        #map.drag{cursor:grabbing}
+        #lmap{position:absolute;inset:0;z-index:1;visibility:hidden}
+        #lmap.on{visibility:visible}
+        .land{fill:var(--land);stroke:var(--mute);stroke-width:1}
+        .nei{fill:var(--land);opacity:.5}
+        .org{fill:var(--ink)}
+        .route{fill:none;stroke:var(--ink);stroke-width:2;stroke-dasharray:6 5}
+        .lbl{font:700 calc(11px*var(--z,1)) Figtree,sans-serif;fill:var(--ink);paint-order:stroke;stroke:var(--sea);stroke-width:calc(3px*var(--z,1));pointer-events:none}
+        .cty{font:500 calc(10px*var(--z,1)) Figtree,sans-serif;fill:var(--mute);paint-order:stroke;stroke:var(--land);stroke-width:calc(3px*var(--z,1));pointer-events:none}
+        .sea{font:italic calc(12px*var(--z,1)) Figtree,sans-serif;fill:var(--mute);opacity:.85;pointer-events:none}
+        .pin{cursor:pointer;vector-effect:non-scaling-stroke;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3));transition:r .15s}
+        svg .pin{fill:var(--pin);stroke:#fff;stroke-width:3}
+        svg .pin:hover{stroke:var(--acc)}
+        svg .pin[data-cat=Culture]{fill:var(--c-culture)}
+        svg .pin[data-cat=Heritage]{fill:var(--c-heritage)}
+        svg .pin[data-cat=Landmarks]{fill:var(--c-landmarks)}
+        svg .pin[data-cat=Nature]{fill:var(--c-nature)}
+        svg .pin[data-cat=Beach]{fill:var(--c-beach)}
+        svg .pin[data-cat=Family]{fill:var(--c-family)}
+        svg .pin[data-cat=Adventure]{fill:var(--c-adventure)}
+        svg .pin[data-cat=Shopping]{fill:var(--c-shopping)}
+        svg .pin.in{fill:var(--acc);stroke:var(--ink)}
+        svg .pin.sel{fill:var(--ink);stroke:#fff}
+        .lpin{display:block;width:16px;height:16px;border-radius:50%;background:var(--pin);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+        .lpin.in{background:var(--acc);border-color:var(--ink)}
+        .lpin.sel{background:var(--ink);transform:scale(1.35)}
+        .zc{position:absolute;right:14px;top:14px;z-index:2;display:flex;flex-direction:column;gap:6px}
+        .zc button{
+            width:42px;min-height:42px;border:0;border-radius:12px;color:var(--ink);cursor:pointer;
+            background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(8px);
+            font:600 20px/1 Figtree,sans-serif;box-shadow:var(--shadow);
+        }
+        .zc button:hover{background:var(--acc);color:var(--accink)}
+        #zreset{font-size:12px}
+        .legend{
+            position:absolute;left:12px;bottom:12px;z-index:2;display:flex;flex-wrap:wrap;gap:4px 12px;
+            max-width:calc(100% - 24px);padding:8px 12px;border-radius:12px;font-size:12px;font-weight:600;
+            background:color-mix(in srgb,var(--panel) 90%,transparent);backdrop-filter:blur(8px);box-shadow:var(--shadow);
+        }
+        .legend span{display:inline-flex;align-items:center;gap:5px}
+        .legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+        .legend .ring{background:var(--acc);box-shadow:0 0 0 2px var(--ink)}
+        .legend small{flex-basis:100%;color:var(--mute);font-weight:500}
+
+        /* ============ Place list ============ */
+        #list{
+            max-height:520px;overflow-y:auto;overscroll-behavior:contain;padding:6px;
+            background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);
+            scrollbar-width:thin;scrollbar-color:var(--line) transparent;
+        }
+        .item{
+            position:relative;margin:2px 0;padding:14px 16px 14px 20px;cursor:pointer;
+            background:var(--panel);border-radius:var(--r-sm);transition:background .15s;
+        }
+        .item::before{content:"";position:absolute;left:7px;top:14px;bottom:14px;width:4px;border-radius:4px;background:var(--line)}
+        .item[data-cat=Culture]::before{background:var(--c-culture)}
+        .item[data-cat=Heritage]::before{background:var(--c-heritage)}
+        .item[data-cat=Landmarks]::before{background:var(--c-landmarks)}
+        .item[data-cat=Nature]::before{background:var(--c-nature)}
+        .item[data-cat=Beach]::before{background:var(--c-beach)}
+        .item[data-cat=Family]::before{background:var(--c-family)}
+        .item[data-cat=Adventure]::before{background:var(--c-adventure)}
+        .item[data-cat=Shopping]::before{background:var(--c-shopping)}
+        .item:hover{background:color-mix(in srgb,var(--panel) 92%,var(--sea))}
+        .item[aria-current=true]{background:color-mix(in srgb,var(--panel) 80%,var(--acc));box-shadow:0 0 0 2px var(--acc) inset}
+        .item:focus-visible{outline:3px solid var(--acc);outline-offset:-3px}
+        .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+        .row h2{flex:1}
+        .item h2{font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1.25}
+        .eta{background:var(--ink);color:var(--panel);font-size:12.5px;font-weight:600;padding:3px 11px;border-radius:99px;white-space:nowrap}
+        .more{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+        .item[aria-current=true] .more{display:block;animation:rise .2s ease-out}
+        .more p{margin:4px 0;max-width:62ch}
+        @keyframes rise{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+        /* ============ Mobile ============ */
+        /* ============ Temperature ============ */
+        .temp{
+            font-size:12.5px;font-weight:600;white-space:nowrap;padding:3px 10px;border-radius:99px;
+            background:color-mix(in srgb,var(--acc) 35%,var(--panel));color:var(--ink);
+        }
+        /* ============ Full-screen map ============ */
+        #zfull{font-size:18px}
+        .mapwrap.full{
+            position:fixed;inset:0;z-index:1000;margin:0;border-radius:0;box-shadow:none;
+            display:flex;align-items:center;justify-content:center;
+        }
+        .mapwrap.full #map{height:100%}
+        .mapwrap.full .zc{top:calc(14px + env(safe-area-inset-top,0px))}
+        .mapwrap.full .legend{bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+        @media(max-width:600px){
+            header{width:auto;margin:12px;border-radius:22px}
+            .bar{width:auto;margin:0 12px 12px}
+            .pw,main{padding-left:12px;padding-right:12px}
+            .mapwrap{margin:0}
+            .row{flex-wrap:wrap}
+            .row h2{flex-basis:100%}
+            .legend{font-size:11px;padding:6px 8px}
+        }
+        @media(prefers-reduced-motion:reduce){
+            *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+        }
+               /* ============ Compact personalise panel ============ */
+        .prefs{padding:10px 14px}
+        .prefs h2{font-size:16px}
+        .prefs .tag{font-size:12px;margin:2px 0 0!important}
+        .bar2{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 10px;margin-top:8px}
+        .bar2 label{gap:3px;font-size:11px}
+        .bar2 select{width:auto;min-width:120px;padding:5px 8px;font-size:13px}
+        #plan-btn{padding:8px 16px;font-size:14px;grid-column:auto;justify-self:auto;box-shadow:none}
+   @media(max-width:899px){
+    main{display:flex;flex-direction:column-reverse}
+}
+    </style>
+</head>
+<body>
+<header>
+    <h1>Wayfinder</h1>
+    <p>One place to find where to go across all seven emirates, how to get there from where you start, and to turn picks into a day plan.</p>
+</header>
+<div class="bar">
+    <label>Starting from <select id="org" aria-label="Starting point"></select></label>
+    <input id="q" type="search" placeholder="Search places or emirates" aria-label="Search destinations">
+    <div class="chips" id="chips" role="group" aria-label="Filter by type"></div>
+</div>
+<div class="pw"><div class="prefs"><h2>Personalise your trip</h2><p class="tag" style="margin:2px 0 8px">Budget and drive time filter the list. Choose a type above and Best match ranks places of that type first.</p><div class="bar2"><label>Budget <select id="bud"></select></label><label>Drive time <select id="tm"></select></label><label>Sort by <select id="srt"></select></label><label>Trip length <select id="days"></select></label><label>Pace <select id="pace"></select></label><button class="btn add" id="plan-btn" type="button">Plan my trip</button></div></div></div>
+<main>
+    <section class="mapwrap" aria-label="Map of destinations"><svg id="map" viewBox="-20 -10 521 426" role="img" aria-label="Stylised map of the UAE with destination pins"></svg><div class="zc"><button type="button" id="zin" aria-label="Zoom in">+</button><button type="button" id="zout" aria-label="Zoom out">−</button><button type="button" id="zreset" aria-label="Reset map view">>Reset</button><button type="button" id="zfull" aria-label="Full screen map" aria-pressed="false">⤢</button></div></section>
+    <section>
+        <div class="trip" id="plan" hidden style="margin:0 0 12px"></div>
+        <div class="trip" id="saved" style="margin:0 0 12px"></div>
+        <ul id="list"></ul>
+        <div class="trip" id="trip"></div>
+    </section>
+</main>
+<div class="pw"><div class="prefs" id="trust"></div></div>
+<footer>Prototype using sample data. Travel times are estimates (road distance at average speeds) and prices are sample estimates in AED. Production version would read open tourism, transport, event and location datasets (for example Bayanat, Dubai Pulse, Abu Dhabi Open Data) through a shared API with source attribution.</footer>
+<script>
+    window.onerror=(m,s,l,c)=>document.body.insertAdjacentHTML("afterbegin",'<pre style="background:#fee;color:#900;padding:10px;margin:0;white-space:pre-wrap">ERROR: '+m+' (line '+l+')</pre>');
+    const HUBS=[["Dubai Airport (DXB)",25.2532,55.3657],["Abu Dhabi Airport (AUH)",24.433,54.6511],["Sharjah city",25.3463,55.4209],["Ras Al Khaimah city",25.7895,55.9432],["Fujairah city",25.1288,56.3265],["Al Ain city",24.2075,55.7447],["Ajman city",25.4052,55.5136],["Umm Al Quwain city",25.5647,55.5552]];
+    const D=[
+        ["Burj Khalifa & Dubai Mall","Dubai","Landmarks",25.1972,55.2744,"Dubai Metro Red Line to Burj Khalifa/Dubai Mall station, then covered walkway.","Observation decks, fountain show and the largest mall in the city."],
+        ["Museum of the Future","Dubai","Culture",25.2195,55.2818,"Dubai Metro to Emirates Towers station, then a short walk.","A calligraphy-wrapped building on innovation and future cities."],
+        ["Al Fahidi Historical District","Dubai","Heritage",25.2637,55.2972,"Dubai Metro Green Line to Al Fahidi station.","Wind-tower houses, galleries and the abra crossing to the souks."],
+        ["Dubai Marina & JBR Beach","Dubai","Beach",25.0805,55.1403,"Metro Red Line to DMCC or Marina stations, then Dubai Tram.","Waterfront promenade, beach and restaurants."],
+        ["Palm Jumeirah & Atlantis","Dubai","Family",25.1304,55.1171,"Metro and Tram to Palm Monorail, or taxi.","Resorts, aquarium and waterpark on the palm-shaped island."],
+        ["Dubai Desert Conservation Reserve","Dubai","Nature",24.83,55.63,"Car or tour operator pick-up; no public transport.","Dunes, oryx and sunrise or sunset desert experiences."],
+        ["Sheikh Zayed Grand Mosque","Abu Dhabi","Culture",24.4128,54.475,"Intercity bus to Abu Dhabi, then bus or taxi; free guided tours.","Marble mosque with a vast courtyard; dress modestly."],
+        ["Louvre Abu Dhabi","Abu Dhabi","Culture",24.5336,54.3985,"Bus or taxi to Saadiyat Cultural District.","Art museum under a lattice dome over the water."],
+        ["Qasr Al Watan","Abu Dhabi","Landmarks",24.4627,54.3012,"Taxi or bus from Abu Dhabi city centre.","The presidential palace, open to visitors."],
+        ["Yas Island","Abu Dhabi","Family",24.4837,54.607,"Intercity bus or taxi, then Yas free shuttle loops.","Theme parks, circuit and waterpark in one district."],
+        ["Al Ain Oasis","Abu Dhabi","Heritage",24.2255,55.777,"Intercity bus to Al Ain, then taxi.","UNESCO-listed date palm oasis with shaded walking paths."],
+        ["Jebel Hafeet","Abu Dhabi","Nature",24.06,55.777,"Car or taxi from Al Ain; mountain road to the summit.","Winding road with views over Al Ain and the border."],
+        ["Sharjah Heritage & Arts Area","Sharjah","Culture",25.3573,55.3871,"Intercity bus from Dubai Union station, then taxi.","Museums, souks and art spaces in the old town."],
+        ["Mleiha Archaeological Centre","Sharjah","Heritage",25.1396,55.8478,"Car or taxi; tours depart from Sharjah and Dubai.","Desert tombs, fossils and stargazing."],
+        ["Jebel Jais","Ras Al Khaimah","Nature",25.9926,56.147,"Car or taxi recommended; limited public transport.","Highest peak, mountain road and the long zipline."],
+        ["Fujairah Fort","Fujairah","Heritage",25.1177,56.3375,"Intercity bus from Dubai to Fujairah, then taxi.","One of the oldest forts in the country."],
+        ["Khor Fakkan Beach","Sharjah","Beach",25.3395,56.357,"Intercity bus to the east coast, then taxi.","East-coast beach with mountains behind."],
+        ["Hatta Dam","Dubai","Nature",24.8,56.117,"Car, or Hatta bus from Dubai.","Mountain lake with kayaks and hiking."],
+        ["Dubai Frame", "Dubai", "Landmarks", 25.2355, 55.3003, "Dubai Metro Green Line to Dubai Frame station.", "Giant frame with a glass-floor sky bridge and views of old and new Dubai."],
+        ["Gold & Spice Souks, Deira", "Dubai", "Shopping", 25.2865, 55.298, "Dubai Metro Green Line to Al Ras station, then walk.", "Old-town lanes of gold, spices and textiles near the Creek abra crossing."],
+        ["Jumeirah Mosque", "Dubai", "Culture", 25.2336, 55.2669, "Bus or taxi from Jumeirah; guided visits on set days.", "One of the few mosques in Dubai open to non-Muslim visitors on guided tours."],
+        ["Kite Beach", "Dubai", "Beach", 25.1585, 55.2077, "Bus or taxi from Metro to Jumeirah.", "Wide public beach with food trucks, sports courts and Burj Al Arab views."],
+        ["Burj Al Arab & Madinat Jumeirah", "Dubai", "Landmarks", 25.1412, 55.1853, "Taxi, or Metro to Mall of the Emirates then bus.", "Sail-shaped hotel and a souk with canals and waterfront dining."],
+        ["Global Village", "Dubai", "Family", 25.0713, 55.3068, "Bus or taxi; open in the cooler months only.", "Pavilions from dozens of countries with food, shows and rides."],
+        ["Ski Dubai & Mall of the Emirates", "Dubai", "Family", 25.1181, 55.2, "Dubai Metro Red Line to Mall of the Emirates station.", "Indoor ski slope and penguins inside one of the largest malls."],
+        ["Dubai Miracle Garden", "Dubai", "Nature", 25.06, 55.244, "Car or taxi; open in the cooler months only.", "Huge flower displays and shaped floral structures."],
+        ["Al Qudra Lakes", "Dubai", "Nature", 24.85, 55.365, "Car or taxi.", "Desert lakes with flamingos, cycling tracks and picnic spots."],
+        ["Ras Al Khor Wildlife Sanctuary", "Dubai", "Nature", 25.19, 55.338, "Car or taxi; hides open daily.", "Flamingos and wading birds beside the city skyline."],
+        ["Alserkal Avenue", "Dubai", "Culture", 25.144, 55.226, "Taxi or ride-hail to Al Quoz.", "Converted warehouses with galleries, studios and cafes."],
+        ["Skydive Dubai (Palm Drop Zone)", "Dubai", "Adventure", 25.1137, 55.134, "Taxi or ride-hail to the Palm.", "Tandem skydive over the Palm Jumeirah and the coast."],
+        ["Hatta Heritage Village", "Dubai", "Heritage", 24.81, 56.122, "Car, or Hatta bus from Dubai.", "Hill-top village of stone houses, forts and watchtowers."],
+        ["Abu Dhabi Corniche", "Abu Dhabi", "Beach", 24.475, 54.35, "Bus or taxi from the city centre.", "Long waterfront promenade with a public beach and cycle path."],
+        ["Emirates Palace", "Abu Dhabi", "Landmarks", 24.4617, 54.317, "Taxi or bus from the Corniche.", "Grand palace hotel with gold-trimmed halls and gardens."],
+        ["Qasr Al Hosn", "Abu Dhabi", "Heritage", 24.4825, 54.356, "Bus or taxi to the city centre.", "The oldest stone building in the city, now a museum and cultural site."],
+        ["Heritage Village Abu Dhabi", "Abu Dhabi", "Heritage", 24.476, 54.3, "Taxi or bus to Breakwater.", "Recreated Bedouin camp with crafts, a souk and city views."],
+        ["Warner Bros. World Abu Dhabi", "Abu Dhabi", "Family", 24.4871, 54.601, "Intercity bus or taxi, then Yas free shuttle.", "Indoor theme park with themed lands and rides."],
+        ["Yas Waterworld", "Abu Dhabi", "Family", 24.488, 54.613, "Intercity bus or taxi, then Yas free shuttle.", "Large waterpark with slides and a pearl-diving theme."],
+        ["Jubail Mangrove Park", "Abu Dhabi", "Nature", 24.53, 54.44, "Car or taxi; kayak tours depart nearby.", "Boardwalk and kayak routes through the city mangroves."],
+        ["Saadiyat Beach", "Abu Dhabi", "Beach", 24.542, 54.428, "Car, taxi or bus to Saadiyat Island.", "Long white beach with turtle nesting in season."],
+        ["Sir Bani Yas Island", "Abu Dhabi", "Nature", 24.333, 52.617, "Ferry from Jebel Dhanna, then tour; long drive from the city.", "Wildlife reserve with giraffes, oryx and a desert-island resort."],
+        ["Liwa Oasis", "Abu Dhabi", "Adventure", 23.13, 53.77, "Car only; about 3 hours from Abu Dhabi.", "Date farms at the edge of the Empty Quarter with huge dunes."],
+        ["Al Qattara Oasis", "Abu Dhabi", "Heritage", 24.239, 55.787, "Taxi or bus from Al Ain centre.", "Restored oasis and fort in the historic Al Ain area."],
+        ["Al Jahili Fort", "Abu Dhabi", "Heritage", 24.216, 55.768, "Taxi or bus from Al Ain centre.", "Historic fort and exhibition on the explorer Wilfred Thesiger."],
+        ["Hili Archaeological Park", "Abu Dhabi", "Heritage", 24.267, 55.777, "Taxi from Al Ain.", "Bronze Age tombs and a UNESCO-listed cultural site."],
+        ["Al Ain Zoo", "Abu Dhabi", "Family", 24.176, 55.734, "Taxi from Al Ain.", "Large zoo and safari with conservation programs."],
+        ["Wadi Adventure", "Abu Dhabi", "Adventure", 24.09, 55.748, "Car or taxi from Al Ain.", "White-water rafting and surf at the foot of Jebel Hafeet."],
+        ["Al Wathba Wetland Reserve", "Abu Dhabi", "Nature", 24.263, 54.606, "Car; permit needed from the authority.", "Flamingo-watching site in the desert outside the capital."],
+        ["Al Noor Mosque & Khalid Lagoon", "Sharjah", "Culture", 25.361, 55.378, "Intercity bus from Dubai Union station, then taxi.", "Ottoman-style mosque on a lagoon with a lit corniche."],
+        ["Sharjah Aquarium", "Sharjah", "Family", 25.36, 55.384, "Intercity bus from Dubai, then taxi.", "Marine life exhibits at the Khalid Lagoon."],
+        ["Al Qasba", "Sharjah", "Family", 25.329, 55.379, "Intercity bus from Dubai, then taxi.", "Canal-side promenade with restaurants and a Ferris wheel."],
+        ["Khor Kalba Mangroves", "Sharjah", "Nature", 25.057, 56.364, "Car or taxi from Fujairah or Khor Fakkan.", "Rare mangroves on the east coast; kayak tours run through them."],
+        ["Ajman Museum", "Ajman", "Heritage", 25.4125, 55.5107, "Taxi or intercity bus from Dubai or Sharjah.", "Fort museum covering the history and crafts of Ajman."],
+        ["Ajman Corniche", "Ajman", "Beach", 25.415, 55.435, "Taxi or intercity bus from Dubai or Sharjah.", "Quiet public beach and waterfront walk."],
+        ["Al Zorah Mangroves", "Ajman", "Nature", 25.446, 55.492, "Car or taxi.", "Mangrove lagoon with flamingos and kayak trips."],
+        ["Dreamland Aqua Park", "Umm Al Quwain", "Family", 25.53, 55.6, "Car or taxi from Dubai or Sharjah.", "Large waterpark on the road to Ras Al Khaimah."],
+        ["Umm Al Quwain Old Fort & Museum", "Umm Al Quwain", "Heritage", 25.564, 55.553, "Car or taxi from Sharjah or Dubai.", "Watchtower fort with exhibits on local life and pearling."],
+        ["Al Sinniyah Island", "Umm Al Quwain", "Nature", 25.6, 55.625, "Car, then boat tour with a local operator.", "Mangrove island with birdlife and a quiet coast."],
+        ["Dhayah Fort", "Ras Al Khaimah", "Heritage", 25.82, 56.005, "Car or taxi from Ras Al Khaimah city.", "Hilltop fort with sea and mountain views; steep climb."],
+        ["Jazirat Al Hamra", "Ras Al Khaimah", "Heritage", 25.697, 55.789, "Car or taxi from Ras Al Khaimah city.", "Traditional coral-stone village left from the pearling era."],
+        ["Marjan Island", "Ras Al Khaimah", "Beach", 25.667, 55.75, "Car or taxi from Ras Al Khaimah city.", "Resort island with beaches, marinas and waterfront restaurants."],
+        ["Jais Flight Zipline", "Ras Al Khaimah", "Adventure", 25.96, 56.15, "Car or taxi to Jebel Jais.", "Very long zipline over the mountain valley."],
+        ["National Museum of Ras Al Khaimah", "Ras Al Khaimah", "Culture", 25.794, 55.95, "Taxi from Ras Al Khaimah city.", "Fort-museum on the history, archaeology and rulers of the emirate."],
+        ["Al Bidyah Mosque", "Fujairah", "Heritage", 25.442, 56.357, "Taxi from Khor Fakkan or Fujairah.", "Small mosque said to be the oldest in the country."],
+        ["Fujairah Heritage Village", "Fujairah", "Heritage", 25.1315, 56.347, "Taxi from Fujairah city.", "Open-air village with crafts and traditional buildings."],
+        ["Snoopy Island", "Fujairah", "Beach", 25.517, 56.356, "Car or taxi from Fujairah city.", "Beach with snorkeling beside a small rock island."],
+        ["Wadi Wurayah National Park", "Fujairah", "Nature", 25.1, 56.24, "Car; permit and guide recommended.", "Mountain pools and waterfalls in a protected wadi."],
+        ["Masafi Friday Market", "Fujairah", "Shopping", 25.297, 56.151, "Car or taxi on the Fujairah to Dubai road.", "Roadside market for fruit, plants, pottery and carpets."],
+        ["Al Mamzar Beach Park","Dubai","Beach",25.3010,55.3430,"Bus or taxi from Deira.","Gated beach park with lawns, pools and calm water.",1,"about AED 5"],
+        ["Umm Suqeim Beach (Sunset Beach)","Dubai","Beach",25.1420,55.1900,"Bus or taxi from Jumeirah.","Public beach with a close-up view of Burj Al Arab.",0,"free"],
+        ["Black Palace Beach","Dubai","Beach",25.1160,55.1580,"Bus or taxi from Al Sufouh.","Quiet public beach near the Palm, good for sunset.",0,"free"],
+        ["Al Barsha Pond Park","Dubai","Nature",25.1100,55.2010,"Bus or taxi from Al Barsha.","Neighbourhood park with a pond, paths and a playground.",0,"free"],
+        ["Coffee Museum","Dubai","Culture",25.2640,55.2985,"Dubai Metro Green Line to Al Fahidi station.","Small museum on the history of coffee in a heritage house.",1,"low entry fee"],
+        ["Majlis Gallery","Dubai","Culture",25.2638,55.2980,"Dubai Metro Green Line to Al Fahidi station.","Art gallery in an old wind-tower house.",0,"free"],
+        ["Dubai Ice Rink","Dubai","Family",25.1980,55.2790,"Metro to Burj Khalifa/Dubai Mall station.","Olympic-size ice rink inside Dubai Mall.",2,"about AED 80"],
+        ["KidZania Dubai","Dubai","Family",25.1990,55.2795,"Metro to Burj Khalifa/Dubai Mall station.","Children's role-play city where kids try out jobs.",3,"AED 150+"],
+        ["Green Planet Dubai","Dubai","Family",25.2080,55.2630,"Taxi or ride-hail to City Walk.","Indoor rainforest with birds, sloths and plants.",2,"about AED 100"],
+        ["Dubai Marina Mall","Dubai","Shopping",25.0770,55.1400,"Dubai Tram or Metro to Dubai Marina.","Waterfront mall with restaurants beside the marina.",0,"free to browse"],
+        ["Marina Walk","Dubai","Landmarks",25.0790,55.1410,"Dubai Tram or Metro to Dubai Marina.","Waterfront promenade lined with cafes and yachts.",0,"free"],
+        ["The Beach at JBR","Dubai","Shopping",25.0770,55.1340,"Dubai Tram to JBR.","Open-air strip of cafes and shops beside the beach.",0,"free to walk around"],
+        ["BoxPark","Dubai","Shopping",25.2155,55.2615,"Taxi or ride-hail.","Container-style shops and restaurants in Al Wasl.",0,"free to browse"],
+        ["Dragon Mart","Dubai","Shopping",25.1690,55.4100,"Metro to Rashidiya, then bus or taxi.","Large trading centre for Chinese goods.",0,"free to browse"],
+        ["Grand Mosque, Bur Dubai","Dubai","Culture",25.2630,55.2950,"Metro Green Line to Al Fahidi station.","City's largest mosque with a tall minaret near the creek.",0,"free"],
+        ["Nad Al Sheba Camel Racetrack","Dubai","Heritage",25.1480,55.3500,"Car or taxi.","Camel racing in the cooler season; check race days.",0,"free in race season"],
+        ["Hatta Honey Bee Discovery Centre","Dubai","Family",24.8100,56.1230,"Car, or Hatta bus from Dubai.","Visit a bee farm and learn about local honey.",1,"low entry fee"],
+        ["Aquaventure Waterpark","Dubai","Family",25.1340,55.1170,"Monorail to Atlantis, or taxi.","Large waterpark with slides and a lazy river.",3,"AED 300+"],
+        ["Deira City Centre","Dubai","Shopping",25.2530,55.3320,"Dubai Metro to City Centre station.","One of the older large malls in the city.",0,"free to browse"],
+        ["BurJuman","Dubai","Shopping",25.2540,55.3040,"Dubai Metro to BurJuman station.","Long-running mall in Bur Dubai, linked to the Metro.",0,"free to browse"],
+        ["Dubai Festival City Mall","Dubai","Shopping",25.2220,55.3530,"Taxi or ride-hail.","Waterfront mall with a creekside promenade.",0,"free to browse"],
+        ["Wafi City","Dubai","Shopping",25.2290,55.3180,"Dubai Metro to Dubai Healthcare City station.","Pyramid-themed complex with shops and restaurants.",0,"free to browse"],
+        ["Mirdif City Centre","Dubai","Shopping",25.2150,55.4080,"Taxi or bus.","Large family mall in the eastern suburbs.",0,"free to browse"],
+        ["Emirates Towers","Dubai","Landmarks",25.2170,55.2810,"Dubai Metro to Emirates Towers station.","Twin towers on Sheikh Zayed Road, a long-standing icon.",0,"free to look"],
+        ["Cayan Tower","Dubai","Landmarks",25.0830,55.1450,"Dubai Tram or Metro to Dubai Marina.","Twisting 90-degree skyscraper in the Marina.",0,"free to look"],
+        ["The Pointe","Dubai","Landmarks",25.1170,55.1400,"Palm Monorail, or taxi.","Palm Jumeirah waterfront with fountain shows at night.",0,"free"],
+        ["Marina Mall Abu Dhabi","Abu Dhabi","Shopping",24.4760,54.3220,"Bus or taxi from the Corniche.","Mall at the Breakwater with a tower and marina views.",0,"free to browse"],
+        ["Al Maryah Island Promenade","Abu Dhabi","Landmarks",24.5020,54.3880,"Bus or taxi from the city centre.","Waterfront walk with views of the city skyline.",0,"free"],
+        ["The Galleria Al Maryah Island","Abu Dhabi","Shopping",24.5010,54.3910,"Bus or taxi from the city centre.","Upscale mall with a waterfront promenade.",0,"free to browse"],
+        ["Al Maqta Fort","Abu Dhabi","Heritage",24.4170,54.4720,"Taxi from the city centre.","Old watchtower and fort once guarding the creek crossing.",0,"free"],
+        ["Sheikh Sultan Bin Zayed Fort (Al Ain Fort)","Abu Dhabi","Heritage",24.2175,55.7672,"Taxi or bus from Al Ain centre.","Historic fort near the Al Ain National Museum.",0,"free"],
+        ["Abu Dhabi Mall","Abu Dhabi","Shopping",24.4970,54.3830,"Bus or taxi from the city centre.","Central mall with a large range of shops.",0,"free to browse"],
+        ["Marina Breakwater","Abu Dhabi","Landmarks",24.4770,54.3010,"Taxi or bus.","Pier-like walkway with city skyline views.",0,"free"],
+        ["Bait Al Naboodah","Sharjah","Heritage",25.3573,55.3875,"Intercity bus from Dubai Union station, then taxi.","Restored merchant house showing life in old Sharjah.",1,"about AED 5"],
+        ["Sharjah Heritage Museum","Sharjah","Heritage",25.3580,55.3885,"Intercity bus from Dubai, then taxi.","Displays of local customs, crafts and daily life.",1,"about AED 5"],
+        ["Souq Al Jubail","Sharjah","Shopping",25.3615,55.3880,"Intercity bus from Dubai, then taxi.","Covered market for fish, fruit and vegetables.",0,"free to browse"],
+        ["Kalba Bird of Prey Centre","Sharjah","Nature",25.0620,56.3640,"Car or taxi from Fujairah or Khor Fakkan.","Conservation centre for raptors on the east coast.",1,"low entry fee"],
+        ["Kalba Corniche","Sharjah","Beach",25.0600,56.3600,"Car or taxi from Fujairah or Khor Fakkan.","Seafront promenade and beach on the east coast.",0,"free"],
+        ["Khor Fakkan Corniche","Sharjah","Beach",25.3380,56.3560,"Intercity bus to the east coast, then taxi.","Seafront walk with mountain views.",0,"free"],
+        ["Al Rams Fishing Village","Ras Al Khaimah","Heritage",25.8700,56.0110,"Car or taxi from Ras Al Khaimah city.","Fishing village with a small harbour and old houses.",0,"free"],
+        ["Manar Mall","Ras Al Khaimah","Shopping",25.7850,55.9470,"Taxi from Ras Al Khaimah city.","Main mall in the city centre.",0,"free to browse"],
+        ["Al Aqah Beach","Fujairah","Beach",25.4950,56.3600,"Car or taxi from Fujairah city.","Long beach north of Fujairah, popular for swimming.",0,"free"]
+    ];
+    const CATS=["All","Culture","Heritage","Landmarks","Nature","Beach","Family","Adventure","Shopping"];
+    const SRC={"Dubai":["Visit Dubai","https://www.visitdubai.com"],"Abu Dhabi":["Visit Abu Dhabi","https://www.visitabudhabi.ae"],"Sharjah":["Visit Sharjah","https://www.visitsharjah.com"],"Ras Al Khaimah":["Ras Al Khaimah Tourism","https://www.rak.ae"],"Fujairah":["Fujairah Tourism","https://www.fujairahtourism.ae"],"Ajman":["Ajman Tourism","https://www.ajman.travel"],"Umm Al Quwain":["Umm Al Quwain tourism (UAE Government portal)","https://u.ae/en/information-and-services/visiting-and-exploring-the-uae/what-to-do-in-the-uae/explore-the-uae-by-emirate-"]};
+    const GOV=["UAE Government portal: official tourism websites","https://u.ae/en/information-and-services/visiting-and-exploring-the-uae/uae-an-ideal-tourist-destination/uae-official-tourism-websites"];
+    const GOV2=["UAE Government portal: explore the UAE by emirate","https://u.ae/en/information-and-services/visiting-and-exploring-the-uae/what-to-do-in-the-uae/explore-the-uae-by-emirate-"];
+    const PACE=[["Relaxed",2],["Balanced",3],["Packed",4]],COST=[0,10,80,250];
+    const ICATS=CATS.slice(1),TIERS=["Free","Low","Medium","Premium"];
+    const PR=[[3,"from about AED 170 for the deck"],[3,"about AED 145"],[0,"free to walk around"],[0,"free"],[3,"AED 250+ for attractions"],[3,"AED 200+ for tours"],[0,"free"],[2,"about AED 63"],[2,"about AED 65"],[3,"AED 300+ for park tickets"],[1,"about AED 10"],[0,"free"],[1,"AED 10–25 for museums"],[2,"AED 50–150"],[2,"free to visit, activities extra"],[1,"about AED 5"],[0,"free"],[1,"free to visit, kayaks extra"],[2, "about AED 50"],[0, "free to browse"],[1, "about AED 35 for tour"],[0, "free"],[0, "free to walk around"],[1, "about AED 25"],[3, "AED 200+ for snow park"],[2, "about AED 100"],[0, "free"],[0, "free"],[0, "free"],[3, "from about AED 2,000"],[0, "free"],[0, "free"],[0, "free to look; dining extra"],[1, "about AED 30"],[0, "free"],[3, "AED 300+"],[3, "AED 250+"],[1, "free walk; kayak extra"],[1, "free public area; clubs extra"],[3, "AED 300+ for tours"],[0, "free"],[0, "free"],[0, "free"],[0, "free"],[2, "about AED 50"],[3, "AED 150+"],[0, "free with permit"],[0, "free"],[1, "about AED 35"],[0, "free to walk around"],[1, "free; kayak tours extra"],[1, "about AED 5"],[0, "free"],[1, "free; kayak extra"],[2, "about AED 150"],[1, "about AED 5"],[2, "AED 100 or more for boat tour"],[0, "free"],[0, "free"],[1, "free public areas"],[3, "about AED 600"],[1, "about AED 5"],[0, "free"],[1, "low entry fee"],[0, "free; gear rental extra"],[0, "free with permit"],[0, "free to browse"]];
+    D.forEach((d,i)=>{if(d.length>7){PR[i]=[d[7],d[8]];d.length=7}});
+    const OUT=[[51.58,24.25],[51.9,24.15],[52.3,24.15],[52.73,24.12],[53.4,24.12],[53.9,24.2],[54.25,24.4],[54.4,24.52],[54.65,24.6],[54.9,24.8],[55.05,25.0],[55.25,25.3],[55.45,25.45],[55.6,25.6],[55.8,25.75],[55.95,25.85],[56.05,26.0],[56.07,25.95],[56.2,25.78],[56.25,25.62],[56.35,25.35],[56.37,25.1],[56.37,24.98],[56.25,24.8],[56.05,24.6],[56.0,24.4],[55.85,24.25],[55.78,24.1],[55.6,23.7],[55.3,23.1],[55.2,22.7],[54.4,22.7],[53.0,22.95],[52.0,23.0],[51.6,24.0]];
+    const IW=481,IH=406,X0=19,Y0=28,SX=96.0,SY=108.7;
+    const X=l=>X0+(l-51.58)*SX,Y=a=>Y0+(26.08-a)*SY;
+    const MAPIMG="data:image/png;base64,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";
+    const POLY=pts=>pts.map(p=>X(p[0]).toFixed(0)+","+Y(p[1]).toFixed(0)).join(" ");
+    const NEI=[[[51.6,24.0],[52.0,23.0],[53.0,22.95],[54.4,22.7],[55.2,22.7],[55.2,22.0],[51.3,22.0],[51.3,24.0]],[[56.37,24.98],[56.6,24.7],[57.0,24.3],[57.0,22.0],[55.2,22.0],[55.2,22.7],[55.3,23.1],[55.6,23.7],[55.78,24.1],[55.85,24.25],[56.0,24.4],[56.05,24.6],[56.25,24.8]],[[56.07,25.95],[56.2,26.2],[56.45,26.2],[56.4,25.9],[56.3,25.7],[56.2,25.78]]];
+    const CITIES=[["Abu Dhabi",24.47,54.37],["Dubai",25.2,55.3],["Sharjah",25.35,55.4],["Ras Al Khaimah",25.79,55.95],["Fujairah",25.12,56.33],["Al Ain",24.21,55.76]];
+    function baseSvg(){
+        let s='<rect x="-30" y="-20" width="'+(IW+60)+'" height="'+(IH+40)+'" fill="var(--sea)"/>';
+        s+='<defs><mask id="um" maskUnits="userSpaceOnUse" x="0" y="0" width="'+IW+'" height="'+IH+'"><image href="'+MAPIMG+'" x="0" y="0" width="'+IW+'" height="'+IH+'"/></mask></defs>';
+        s+='<rect x="0" y="0" width="'+IW+'" height="'+IH+'" fill="var(--land)" mask="url(#um)"/>';
+        s+=CITIES.map(c=>'<circle cx="'+X(c[2]).toFixed(0)+'" cy="'+Y(c[1]).toFixed(0)+'" r="'+(2.5*Z()).toFixed(2)+'" fill="var(--mute)"/><text class="cty" '+(c[2]>55.9?'text-anchor="end" x="'+(X(c[2])-8).toFixed(0):'x="'+(X(c[2])-5).toFixed(0))+'" y="'+(Y(c[1])+14*Z()).toFixed(0)+'">'+c[0]+'</text>').join("");
+        s+='<text class="sea" x="70" y="90">Persian Gulf</text><text class="sea" x="30" y="380">Saudi Arabia</text><text class="sea" x="470" y="385" text-anchor="end">Oman</text>';
+        return s}
+    let st={o:0,cat:"All",q:"",sel:null,trip:[],int:[],bud:3,tm:999,srt:"near",fav:[],simAny:false};
+    try{Object.assign(st,JSON.parse(localStorage.getItem("wf")||"{}"))}catch(e){}
+    const $=id=>document.getElementById(id);
+    const km=(a,b,c,d)=>{const r=Math.PI/180,x=(c-a)*r,y=(d-b)*r;const h=Math.sin(x/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(y/2)**2;return 12742*Math.asin(Math.sqrt(h))};
+    const dist=(la,lo,i)=>km(la,lo,D[i][3],D[i][4])*1.3;
+    const mins=k=>Math.round(k/85*60+5);
+    const fmt=m=>m<60?m+" min":Math.floor(m/60)+" h "+(m%60?m%60+" min":"");
+    function origin(){return HUBS[st.o]}
+    function eta(i){const k=dist(origin()[1],origin()[2],i);return {k,m:mins(k)}}
+    function visible(){const q=st.q.toLowerCase();return D.map((_,i)=>i).filter(i=>(st.cat==="All"||D[i][2]===st.cat)&&(D[i][0]+D[i][1]).toLowerCase().includes(q)&&PR[i][0]<=st.bud&&eta(i).m<=st.tm).sort((a,b)=>st.srt==="match"?score(b)-score(a):eta(a).k-eta(b).k)}
+    function order(){let cur=[origin()[1],origin()[2]],left=[...st.trip],res=[];while(left.length){left.sort((a,b)=>km(cur[0],cur[1],D[a][3],D[a][4])-km(cur[0],cur[1],D[b][3],D[b][4]));const n=left.shift();res.push(n);cur=[D[n][3],D[n][4]]}return res}
+    const VB0=[-20,-10,521,426];let VB=[...VB0];
+    function Z(){return VB[2]/VB0[2]}
+    function setVB(){const m=$("map");m.setAttribute("viewBox",VB.map(n=>n.toFixed(1)).join(" "));m.style.setProperty("--z",Z());m.style.touchAction="none"}
+    function clampVB(){VB[2]=Math.min(VB0[2],Math.max(VB0[2]/30,VB[2]));VB[3]=VB[2]*VB0[3]/VB0[2];VB[0]=Math.min(VB0[0]+VB0[2]-VB[2],Math.max(VB0[0],VB[0]));VB[1]=Math.min(VB0[1]+VB0[3]-VB[3],Math.max(VB0[1],VB[1]))}
+    function zoomSvg(f,fx=.5,fy=.5){const nw=VB[2]/f,nh=VB[3]/f;VB[0]+=(VB[2]-nw)*fx;VB[1]+=(VB[3]-nh)*fy;VB[2]=nw;VB[3]=nh;clampVB();setVB();drawSvg(visible())}
+    function zoomBtn(f){if(typeof TOK!=="undefined"&&TOK&&LM){f>1?LM.zoomIn():LM.zoomOut();return}zoomSvg(f)}
+    function resetView(){if(typeof TOK!=="undefined"&&TOK&&LM){LM.setView([24.6,55.4],8);return}VB=[...VB0];setVB();drawSvg(visible())}
+    function drawSvg(vis){
+        if(st.sel!==null&&Z()<0.999){const px=X(D[st.sel][4]),py=Y(D[st.sel][3]);if(px<VB[0]||px>VB[0]+VB[2]||py<VB[1]||py>VB[1]+VB[3]){VB[0]=px-VB[2]/2;VB[1]=py-VB[3]/2;clampVB();setVB()}}
+        const o=origin();let s=baseSvg();
+        const ord=order();
+        if(ord.length){s+='<polyline class="route" points="'+[[o[1],o[2]],...ord.map(i=>[D[i][3],D[i][4]])].map(p=>X(p[1]).toFixed(0)+","+Y(p[0]).toFixed(0)).join(" ")+'"/>'}
+        s+='<circle class="org" cx="'+X(o[2])+'" cy="'+Y(o[1])+'" r="'+(6*Z()).toFixed(2)+'"/><text class="lbl" x="'+(X(o[2])+9*Z())+'" y="'+(Y(o[1])+4*Z())+'">Start</text>';
+        vis.forEach(i=>{const c="pin"+(st.sel===i?" sel":"")+(st.trip.includes(i)?" in":"");s+='<circle class="'+c+'" data-i="'+i+'" tabindex="0" role="button" aria-label="'+D[i][0]+'" cx="'+X(D[i][4]).toFixed(2)+'" cy="'+Y(D[i][3]).toFixed(2)+'" r="'+((st.sel===i?9:7)*Z()).toFixed(2)+'"/>'});
+        if(st.sel!==null){const i=st.sel;s+='<text class="lbl" x="'+(X(D[i][4])+11*Z())+'" y="'+(Y(D[i][3])+4*Z())+'">'+D[i][0]+'</text>'}
+        $("map").innerHTML=s;
+    }
+    let LM=null,LL=null,TOK=false;
+    function drawMap(vis){
+        drawSvg(vis);
+        if(typeof L==="undefined")return;
+        const el=$("lmap");
+        if(!LM){
+            LM=L.map(el,{zoomControl:false}).setView([24.6,55.4],8);
+            const tl=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"&copy; OpenStreetMap contributors"}).addTo(LM);
+            tl.on("tileload",()=>{if(!TOK){TOK=true;el.classList.add("on");$("map").style.visibility="hidden";LM.invalidateSize()}});
+            LL=L.layerGroup().addTo(LM);
+        }
+        LL.clearLayers();
+        const o=origin();
+        L.circleMarker([o[1],o[2]],{radius:8,color:"#fff",weight:2,fillColor:"#12304a",fillOpacity:1}).bindTooltip("Start: "+o[0]).addTo(LL);
+        const ord=order();
+        if(ord.length)L.polyline([[o[1],o[2]],...ord.map(i=>[D[i][3],D[i][4]])],{color:"#12304a",weight:3,dashArray:"6 6"}).addTo(LL);
+        vis.forEach(i=>{
+            const cls="lpin"+(st.sel===i?" sel":"")+(st.trip.includes(i)?" in":"");
+            const m=L.marker([D[i][3],D[i][4]],{icon:L.divIcon({className:"",html:'<span class="'+cls+'"></span>',iconSize:[18,18]}),title:D[i][0],alt:D[i][0]}).addTo(LL);
+            m.bindTooltip(D[i][0]);
+            m.on("click",()=>{st.sel=i;render();const it=document.querySelector('.item[data-i="'+i+'"]');if(it)it.scrollIntoView({block:"nearest",behavior:"smooth"})});
+        });
+        if(st.sel!==null)LM.panTo([D[st.sel][3],D[st.sel][4]]);
+    }
+    function drawList(vis){
+        $("list").innerHTML=vis.length?vis.map(i=>{const d=D[i],e=eta(i),on=st.sel===i,inn=st.trip.includes(i);
+            return '<li class="item" data-i="'+i+'" '+(on?'aria-current="true"':'')+'><div class="row"><h2>'+d[0]+'</h2><span class="eta">'+fmt(e.m)+' by car</span><button class="heart" data-save="'+i+'" aria-label="'+(st.fav.includes(i)?'Remove ':'Save ')+d[0]+'" aria-pressed="'+st.fav.includes(i)+'">'+(st.fav.includes(i)?'♥':'♡')+'</button></div><div class="tag">'+d[1]+' · '+d[2]+' · '+priceTag(i)+' · about '+Math.round(e.k)+' km'+(st.int.length?' · <b>'+Math.round(score(i))+'% match</b>':'')+'</div><div class="more"><p>'+d[6]+'</p><p><b>Public transport:</b> '+d[5]+'</p><p><b>Trusted information:</b> '+srcLinks(i)+'</p><a class="btn go" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&origin='+origin()[1]+','+origin()[2]+'&destination='+d[3]+','+d[4]+'">Get directions</a><button class="btn sv" data-save="'+i+'">'+(inn_f(i)?'♥ Saved':'♡ Save')+'</button><button class="btn add" data-add="'+i+'">'+(inn?"Remove from day plan":"Add to day plan")+'</button></div></li>'}).join(""):'<li class="empty">No places match. Clear the search or pick another type.</li>';
+    }
+    function drawTrip(){
+        const ord=order();
+        if(!ord.length){$("trip").innerHTML='<h2>Your day plan</h2><p class="tag">Open a place and choose Add to day plan. Stops are ordered to keep driving short.</p>';return}
+        let c=[origin()[1],origin()[2]],tk=0,items="";
+        ord.forEach(i=>{const k=km(c[0],c[1],D[i][3],D[i][4])*1.3;tk+=k;items+='<li>'+D[i][0]+' <span class="tag">('+fmt(mins(k))+' from previous)</span></li>';c=[D[i][3],D[i][4]]});
+        const path=[[origin()[1],origin()[2]],...ord.map(i=>[D[i][3],D[i][4]])].map(p=>p.join(",")).join("/");
+        $("trip").innerHTML='<h2>Your day plan</h2><ol>'+items+'</ol><p><b>'+Math.round(tk)+' km</b> driving, about <b>'+fmt(Math.round(tk/85*60)+ord.length*5)+'</b> on the road.</p><a class="btn go" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/'+path+'">Open full route</a>';
+    }
+    function inn_f(i){return st.fav.includes(i)}
+    function priceTag(i){return '<span title="Sample estimate">'+TIERS[PR[i][0]]+' · '+PR[i][1]+'</span>'}
+    function score(i){let s=st.int.length?(st.int.includes(D[i][2])?60:0):40;const m=eta(i).m;return s+Math.max(0,40*(1-m/(st.tm<999?st.tm:240)))}
+    function toggleFav(i){const k=st.fav.indexOf(i);k<0?st.fav.push(i):st.fav.splice(k,1);render()}
+    function avgTier(){return Math.round(st.fav.reduce((a,i)=>a+PR[i][0],0)/st.fav.length)}
+    function similar(){const avg=avgTier(),cats=new Set(st.fav.map(i=>D[i][2])),ems=new Set(st.fav.map(i=>D[i][1]));return D.map((_,i)=>i).filter(i=>!st.fav.includes(i)&&(st.simAny||Math.abs(PR[i][0]-avg)<=1)).map(i=>[i,(cats.has(D[i][2])?3:0)+(ems.has(D[i][1])?1:0)+(PR[i][0]===avg?1:0)]).filter(x=>x[1]>=3).sort((a,b)=>b[1]-a[1]).slice(0,4).map(x=>x[0])}
+    function drawSaved(){const el=$("saved");if(!st.fav.length){el.innerHTML='<h2>Saved places</h2><p class="tag">Tap ♡ on a place to save it. Similar places in a matching price range will appear here.</p>';return}
+        const sim=similar(),avg=avgTier();
+        el.innerHTML='<h2>Saved places ('+st.fav.length+')</h2><ul class="mini">'+st.fav.map(i=>'<li><span>'+D[i][0]+' <span class="tag">'+D[i][1]+' · '+priceTag(i)+'</span></span><button class="x" data-save="'+i+'" aria-label="Remove '+D[i][0]+' from saved">Remove</button></li>').join('')+'</ul><h2 style="margin-top:12px">Similar places</h2><label class="tag">Price range <select id="simp"><option value="0"'+(st.simAny?'':' selected')+'>Close to my saved ('+TIERS[avg].toLowerCase()+')</option><option value="1"'+(st.simAny?' selected':'')+'>Any price</option></select></label>'+(sim.length?'<ul class="mini">'+sim.map(i=>'<li><span>'+D[i][0]+' <span class="tag">'+D[i][1]+' · '+D[i][2]+' · '+priceTag(i)+'</span></span><button class="x" data-save="'+i+'">♡ Save</button><button class="x" data-open="'+i+'">View</button></li>').join('')+'</ul>':'<p class="tag">No similar places at this price. Try Any price.</p>')}
+    function persist(){try{localStorage.setItem("wf",JSON.stringify({int:st.int,bud:st.bud,tm:st.tm,srt:st.srt,fav:st.fav,simAny:st.simAny,o:st.o}))}catch(e){}}
+    function srcLinks(i){const e=SRC[D[i][1]],l=n=>'<a class="src" target="_blank" rel="noopener" href="'+n[1]+'">'+n[0]+'</a>';return (e?l([e[0]+" (official)",e[1]])+' · ':'')+l(["UAE Government portal",GOV[1]])}
+    function legKm(a,b){return km(D[a][3],D[a][4],D[b][3],D[b][4])*1.3}
+    function buildPlan(){
+        const days=+$("days").value,per=PACE[+$("pace").value][1],n=Math.min(D.length,days*per),o=origin();
+        const c=D.map((_,i)=>i).filter(i=>PR[i][0]<=st.bud).map(i=>[i,score(i)+(st.fav.includes(i)?30:0)]).sort((a,b)=>b[1]-a[1]).slice(0,n).map(x=>x[0]);
+        let cur=[o[1],o[2]],left=[...c],chain=[];
+        while(left.length){left.sort((a,b)=>km(cur[0],cur[1],D[a][3],D[a][4])-km(cur[0],cur[1],D[b][3],D[b][4]));const x=left.shift();chain.push(x);cur=[D[x][3],D[x][4]]}
+        st.plan=[];for(let d=0;d<days;d++){const s=chain.slice(d*per,(d+1)*per);if(s.length)st.plan.push(s)}
+        render();$("plan").scrollIntoView({behavior:"smooth",block:"start"});
+    }
+    function dayStats(s){const o=origin();let k=0,p=[o[1],o[2]];s.forEach(i=>{k+=km(p[0],p[1],D[i][3],D[i][4])*1.3;p=[D[i][3],D[i][4]]});k+=km(p[0],p[1],o[1],o[2])*1.3;return {k,m:Math.round(k/85*60),cost:s.reduce((a,i)=>a+COST[PR[i][0]],0)}}
+    function drawPlan(){const el=$("plan");if(!st.plan||!st.plan.length){el.hidden=true;return}
+        el.hidden=false;
+        el.innerHTML='<h2>Your '+st.plan.length+'-day plan</h2><p class="tag">Starts from '+origin()[0]+'. Built from your interests'+(st.fav.length?', saved places':'')+' and budget. Each day returns to the start.</p>'+st.plan.map((s,d)=>{const t=dayStats(s);return '<div class="day"><h2>Day '+(d+1)+'</h2><ol>'+s.map(i=>'<li>'+D[i][0]+' <span class="tag">'+D[i][1]+' \u00b7 '+TIERS[PR[i][0]]+'</span> '+(SRC[D[i][1]]?'<a class="src" target="_blank" rel="noopener" href="'+SRC[D[i][1]][1]+'">official info</a>':'')+'</li>').join('')+'</ol><p class="tag">About '+fmt(t.m)+' driving round trip \u00b7 entry about AED '+t.cost+' per person (sample estimates)'+(t.m>300?' \u00b7 Long day: consider staying overnight nearby':'')+'</p><button class="x" data-day="'+d+'">Show on map</button></div>'}).join('')+'<button class="x" data-clear="1" style="margin-top:8px">Clear plan</button>'}
+    function drawTrust(){$("trust").innerHTML='<h2>Trusted tourist information</h2><p class="tag" style="margin:2px 0 6px">Official sources. Check them for opening hours, tickets, events and entry rules before you travel.</p><ul class="links">'+[[GOV,"Start here: official tourism websites for all seven emirates."],[GOV2,"What to see in each emirate."],[["Visit Dubai (official)",SRC["Dubai"][1]],"Dubai tourism, events and attractions."],[["Visit Abu Dhabi (official)",SRC["Abu Dhabi"][1]],"Abu Dhabi and Al Ain."],[["Visit Sharjah (official)",SRC["Sharjah"][1]],"Sharjah heritage, arts and events."],[["Ras Al Khaimah Tourism (official)",SRC["Ras Al Khaimah"][1]],"Mountains, beaches and adventure."],[["Fujairah Tourism (official)",SRC["Fujairah"][1]],"East coast heritage and nature."],[["Ajman Tourism (official)",SRC["Ajman"][1]],"Ajman museum, beach and mangroves."]].map(x=>'<li><a target="_blank" rel="noopener" href="'+x[0][1]+'">'+x[0][0]+'</a> <span class="tag">'+x[1]+'</span></li>').join('')+'</ul>'}
+    function render(){const v=visible();drawMap(v);drawList(v);drawPlan();drawSaved();drawTrip();persist()}
+    $("org").innerHTML=HUBS.map((h,i)=>'<option value="'+i+'">'+h[0]+'</option>').join("");
+    $("org").onchange=e=>{st.o=+e.target.value;render()};
+    $("q").oninput=e=>{st.q=e.target.value;render()};
+    $("chips").innerHTML=CATS.map(c=>'<button class="chip" aria-pressed="'+(c==="All")+'">'+c+'</button>').join("");
+    $("chips").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;st.cat=b.textContent;[...$("chips").children].forEach(x=>x.setAttribute("aria-pressed",x===b));render()};
+    $("list").onclick=e=>{const sv=e.target.closest("[data-save]");if(sv){toggleFav(+sv.dataset.save);return}const a=e.target.closest("[data-add]");if(a){const i=+a.dataset.add,k=st.trip.indexOf(i);k<0?st.trip.push(i):st.trip.splice(k,1);render();return}if(e.target.closest("a"))return;const it=e.target.closest(".item");if(it){const i=+it.dataset.i;st.sel=st.sel===i?null:i;render()}};
+    function pick(e){const p=e.target.closest(".pin");if(p){st.sel=+p.dataset.i;render();const el=document.querySelector('.item[data-i="'+st.sel+'"]');if(el)el.scrollIntoView({block:"nearest",behavior:"smooth"})}}
+    $("map").onclick=pick;
+    $("map").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick(e)}};
+       $("chips").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;st.cat=b.textContent;st.int=st.cat==="All"?[]:[st.cat];if(st.int.length&&st.srt==="near"){st.srt="match";$("srt").value="match"}[...$("chips").children].forEach(x=>x.setAttribute("aria-pressed",x===b));render()};
+    $("bud").innerHTML=["Free only","Up to low","Up to medium","Any budget"].map((t,i)=>'<option value="'+i+'">'+t+'</option>').join("");
+    $("tm").innerHTML=[[999,"Any drive time"],[60,"Within 1 h"],[120,"Within 2 h"]].map(t=>'<option value="'+t[0]+'">'+t[1]+'</option>').join("");
+    $("srt").innerHTML='<option value="near">Nearest first</option><option value="match">Best match</option>';
+    $("org").value=st.o;$("bud").value=st.bud;$("tm").value=st.tm;$("srt").value=st.srt;
+    $("bud").onchange=e=>{st.bud=+e.target.value;render()};
+    $("tm").onchange=e=>{st.tm=+e.target.value;render()};
+    $("srt").onchange=e=>{st.srt=e.target.value;render()};
+    $("saved").onchange=e=>{if(e.target.id==="simp"){st.simAny=e.target.value==="1";render();const s=$("simp");if(s)s.focus()}};
+    $("saved").onclick=e=>{const s=e.target.closest("[data-save]");if(s){toggleFav(+s.dataset.save);return}const o=e.target.closest("[data-open]");if(o){st.sel=+o.dataset.open;st.bud=3;st.tm=999;st.q="";st.cat="All";$("bud").value=3;$("tm").value=999;$("q").value="";[...$("chips").children].forEach(x=>x.setAttribute("aria-pressed",x.textContent==="All"));render();const el=document.querySelector('.item[data-i="'+st.sel+'"]');if(el)el.scrollIntoView({block:"nearest",behavior:"smooth"})}};
+    $("days").innerHTML=[1,2,3,4,5].map(n=>'<option value="'+n+'">'+n+(n===1?' day':' days')+'</option>').join("");
+    $("days").value=2;
+    $("pace").innerHTML=PACE.map((p,i)=>'<option value="'+i+'">'+p[0]+' ('+p[1]+' a day)</option>').join("");
+    $("pace").value=1;
+    $("plan-btn").onclick=buildPlan;
+    $("plan").onclick=e=>{const d=e.target.closest("[data-day]");if(d){st.trip=[...st.plan[+d.dataset.day]];render();return}if(e.target.closest("[data-clear]")){st.plan=null;render()}};
+    drawTrust();
+    (function(){
+        const m=$("map"),ptr=new Map();let drag=null,pinch=0;
+        $("zin").onclick=()=>zoomBtn(1.5);$("zout").onclick=()=>zoomBtn(1/1.5);$("zreset").onclick=resetView;
+        m.addEventListener("wheel",e=>{e.preventDefault();const b=m.getBoundingClientRect();zoomSvg(e.deltaY<0?1.25:0.8,(e.clientX-b.left)/b.width,(e.clientY-b.top)/b.height)},{passive:false});
+        m.addEventListener("dblclick",e=>{const b=m.getBoundingClientRect();zoomSvg(1.6,(e.clientX-b.left)/b.width,(e.clientY-b.top)/b.height)});
+               m.addEventListener("pointerdown",e=>{if(e.target.closest(".pin"))return;ptr.set(e.pointerId,[e.clientX,e.clientY]);drag={x:e.clientX,y:e.clientY,moved:false};try{m.setPointerCapture(e.pointerId)}catch(_){};if(ptr.size===2){const p=[...ptr.values()];pinch=Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1])}});
+        m.addEventListener("pointermove",e=>{if(!ptr.has(e.pointerId))return;const b=m.getBoundingClientRect();
+            if(ptr.size===2){ptr.set(e.pointerId,[e.clientX,e.clientY]);const p=[...ptr.values()],d=Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1]);if(pinch&&Math.abs(d-pinch)>6){zoomSvg(d/pinch,((p[0][0]+p[1][0])/2-b.left)/b.width,((p[0][1]+p[1][1])/2-b.top)/b.height);pinch=d}return}
+            if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+            if(!drag.moved&&Math.hypot(dx,dy)<4)return;
+            if(Z()>=0.999)return;
+            drag.moved=true;m.classList.add("drag");try{m.setPointerCapture(e.pointerId)}catch(_){}
+            VB[0]-=dx*VB[2]/b.width;VB[1]-=dy*VB[3]/b.height;clampVB();setVB();drag.x=e.clientX;drag.y=e.clientY;drawSvg(visible())});
+        const end=e=>{ptr.delete(e.pointerId);if(ptr.size<2)pinch=0;m.classList.remove("drag");if(!ptr.size)drag=null};
+        m.addEventListener("pointerup",end);m.addEventListener("pointercancel",end);
+    })();
+    function syncListHeight(){
+        const map=document.querySelector(".mapwrap"),list=$("list");
+        if(map.classList.contains("full"))return;
+        list.style.maxHeight=matchMedia("(min-width:900px)").matches
+            ? Math.round(map.offsetHeight*0.7)+"px"   /* 70% of the map height */
+            : "320px";}
+    new ResizeObserver(syncListHeight).observe(document.querySelector(".mapwrap"));
+    syncListHeight();
+
+    render();
+
+</script>
+<script>
+
+        (function(){
+            // [time needed, best time to go, tip]
+            const INFO={
+                "Burj Khalifa & Dubai Mall":["2–4 h","Late afternoon into evening","Book the observation deck online ahead; sunset slots sell out first. The fountain show runs most evenings."],
+                "Museum of the Future":["2–3 h","Weekday morning","Buy timed tickets in advance; entry slots fill up on weekends."],
+                "Al Fahidi Historical District":["2–3 h","Morning or late afternoon, Oct–Apr","Dress modestly and pair it with the abra ride across the Creek to the souks."],
+                "Dubai Marina & JBR Beach":["2–3 h","Late afternoon to sunset","Walk the Marina promenade, then take the tram to JBR for the beach."],
+                "Palm Jumeirah & Atlantis":["Half day","Morning for the waterpark, evening for the Pointe","Aquaventure and the aquarium are ticketed separately; compare combo prices."],
+                "Dubai Desert Conservation Reserve":["Half day","Sunrise or sunset","Book through a tour operator; most include hotel pick-up. Wear closed shoes and bring a layer for cool evenings."],
+                "Sheikh Zayed Grand Mosque":["1.5–2 h","Morning, or just before sunset for the light","Free entry. Cover arms and legs; women need a headscarf. Visiting hours are limited on Fridays, so check before you go."],
+                "Louvre Abu Dhabi":["2–3 h","Weekday afternoon","Usually closed one day a week; check the calendar and book tickets online."],
+                "Qasr Al Watan":["2–3 h","Morning","Allow time for the evening light show if it is running. Dress smartly."],
+                "Yas Island":["Full day","Weekday, cooler months","Pick one or two parks; Warner Bros. World and Yas Waterworld are each a full day."],
+                "Al Ain Oasis":["1–1.5 h","Early morning","Free to walk. Shaded paths make it a good midday refuge from the heat."],
+                "Jebel Hafeet":["1–2 h","Sunset","Drive to the summit road yourself or by taxi; it is noticeably cooler at the top."],
+                "Jebel Jais":["2–4 h","Cooler months, morning","The summit can be several degrees cooler than the coast. Bring a jacket. Zipline has age and weight limits and needs booking."],
+                "Hatta Dam":["2–3 h","Morning, Oct–Apr","Kayak rental is paid on site. Combine with Hatta Heritage Village nearby."],
+                "Dubai Frame":["1–1.5 h","Late afternoon","Views look both ways: old Dubai one side, new Dubai the other."],
+                "Gold & Spice Souks, Deira":["1.5–2 h","Evening, after 5 pm","Bargaining is expected. Take the short abra ride across the Creek for a small fee."],
+                "Global Village":["3–5 h","Weekday evening","Seasonal: only open in the cooler months. Check this year's dates before planning."],
+                "Dubai Miracle Garden":["1.5–2 h","Morning or late afternoon","Seasonal: only open in the cooler months. Check dates first."],
+                "Al Qudra Lakes":["1–3 h","Sunrise","Best for flamingos, cycling and picnics. Bring water; there is little shade or shop cover."],
+                "Ras Al Khor Wildlife Sanctuary":["1 h","Early morning, winter","Flamingos are most numerous in the cooler months. Bring binoculars if you have them."],
+                "Mleiha Archaeological Centre":["Half day","Late afternoon into night","Evening desert and stargazing programmes need booking."],
+                "Sir Bani Yas Island":["Overnight","Oct–Apr","Reached by ferry, so plan an overnight stay and book the wildlife tour in advance."],
+                "Liwa Oasis":["Overnight","Oct–Apr","Dune driving needs a 4x4 and experience; most visitors go with a tour operator."],
+                "Wadi Wurayah National Park":["Half day","Cooler months","A permit and guide are recommended. Wear sturdy shoes for the walk to the pools."],
+                "Hili Archaeological Park":["1 h","Late afternoon","Pair it with Al Ain Oasis and Al Qattara in a single half-day heritage loop."],
+                "Al Jahili Fort":["1–1.5 h","Morning","Look for the Thesiger photography exhibition inside."],
+                "Wadi Adventure":["Half day","Weekday","Book rafting or surf sessions ahead and bring swimwear and a towel."],
+                "Snoopy Island":["2–3 h","Morning","Bring your own snorkel gear or rent on the beach. Best on calm days."]
+            };
+            // [time needed, best time to go, tip] by type
+            const BYCAT={
+                Culture:["1.5–3 h","Weekday morning","Fewer crowds early in the day. Dress modestly at religious sites."],
+                Heritage:["1–2 h","Early morning or late afternoon","Wear comfortable shoes. Smaller sites can close at midday or one day a week, so check hours."],
+                Landmarks:["1–2 h","Sunset or evening","Best photographed at golden hour. Many are free to look at from outside."],
+                Nature:["2–4 h","Early morning","Bring water, sun protection and a hat. Little shade at most sites."],
+                Beach:["2–4 h","Late afternoon","Midday sun is strong; use sunscreen. Swim where lifeguards are on duty."],
+                Family:["3–6 h","Weekday, cooler months","Buy tickets online for the best price and shorter queues."],
+                Adventure:["Half day","Morning","Book ahead and check age, weight and health limits."],
+                Shopping:["1–3 h","Evening","Most malls open late. Souks and markets are best in the cooler part of the day."]
+            };
+            const css=document.createElement("style");
+            css.textContent=
+                ".facts{margin:12px 0 4px;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--panel) 88%,var(--sea));border:1px solid var(--line)}"+
+                ".facts h3{margin:0 0 8px;font:700 14px/1.2 'Bricolage Grotesque',Figtree,sans-serif}"+
+                ".facts dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px 14px;margin:0}"+
+                ".facts dt{font-size:12px;font-weight:600;color:var(--mute)}"+
+                ".facts dd{margin:2px 0 0;font-weight:600}"+
+                ".facts p.tip{margin:10px 0 0;padding-top:10px;border-top:1px dashed var(--line);max-width:62ch}"+
+                ".facts p.note{margin:6px 0 0;font-size:12.5px;color:var(--mute)}";
+            document.head.appendChild(css);
+
+            const original=drawList;
+            drawList=function(vis){
+                original(vis);
+                document.querySelectorAll("#list .item").forEach(li=>{
+                    const i=+li.dataset.i,d=D[i],more=li.querySelector(".more");
+                    if(!more||more.querySelector(".facts"))return;
+                    const info=INFO[d[0]]||BYCAT[d[2]]||["1–2 h","Morning","Check opening hours before you go."];
+                    const hot="Jun–Sep is very hot outdoors: go before 10 am or after 4 pm.";
+                    const outdoor=["Beach","Nature","Adventure"].includes(d[2])||/Corniche|Souk|Village|Fort|Oasis/.test(d[0]);
+                    const box=document.createElement("div");
+                    box.className="facts";
+                    box.innerHTML=
+                        "<h3>Plan your visit</h3><dl>"+
+                        "<div><dt>Time needed</dt><dd>"+info[0]+"</dd></div>"+
+                        "<div><dt>Best time to go</dt><dd>"+info[1]+"</dd></div>"+
+                        "<div><dt>Cost</dt><dd>"+PR[i][1]+"</dd></div>"+
+                        "<div><dt>Area</dt><dd>"+d[1]+"</dd></div></dl>"+
+                        "<p class=\"tip\"><b>Tip:</b> "+info[2]+(outdoor?" "+hot:"")+"</p>"+
+                        "<p class=\"note\">Prices and hours are sample estimates. Confirm on the official site below before you travel.</p>";
+                    const first=more.querySelector("p");
+                    first?first.after(box):more.prepend(box);
+                });
+            };
+            const origList=drawList;
+            drawList=function(vis){
+                origList(vis);
+                document.querySelectorAll("#list .item").forEach(li=>{li.dataset.cat=D[+li.dataset.i][2]});
+            };
+            const origSvg=drawSvg;
+            drawSvg=function(vis){
+                origSvg(vis);
+                document.querySelectorAll("#map .pin").forEach(p=>{p.dataset.cat=D[+p.dataset.i][2]});
+            };
+            render();
+        })();
+
+
+
+</script>
+<script>
+    (function(){
+        const stats=document.createElement("div");stats.className="stats";
+        stats.innerHTML="<span><b>"+D.length+"</b> places</span><span><b>7</b> emirates</span><span><b>"+(CATS.length-1)+"</b> categories</span>";
+        document.querySelector("header p").before(stats);
+
+        const lg=document.createElement("div");lg.className="legend";
+        lg.innerHTML=ICATS.map(c=>'<span><i style="background:var(--c-'+c.toLowerCase()+')"></i>'+c+'</span>').join("")+'<span><i class="ring"></i>In plan</span><small>Ctrl + scroll to zoom</small>';
+        document.querySelector(".mapwrap").appendChild(lg);
+
+        const cnt=document.createElement("p");cnt.className="count";$("list").before(cnt);
+
+        const s0=drawSvg;
+        drawSvg=function(vis){
+            s0(vis);
+            document.querySelectorAll("#map .pin").forEach(p=>{
+                const t=document.createElementNS("http://www.w3.org/2000/svg","title");
+                t.textContent=D[+p.dataset.i][0];p.appendChild(t);
+            });
+        };
+
+        const l0=drawList;
+        drawList=function(vis){
+            l0(vis);
+            cnt.textContent="Showing "+vis.length+" of "+D.length+" places";
+            document.querySelectorAll("#list .item").forEach(li=>{li.tabIndex=0});
+        };
+
+        $("list").addEventListener("keydown",e=>{
+            if(!e.target.matches(".item")||(e.key!=="Enter"&&e.key!==" "))return;
+            e.preventDefault();
+            const i=e.target.dataset.i;e.target.click();
+            const n=document.querySelector('.item[data-i="'+i+'"]');if(n)n.focus();
+        });
+
+        render();
+    })();
+</script>
+<script>
+    (function(){
+        const w=document.querySelector(".mapwrap"),b=$("zfull");
+        function set(on){
+            w.classList.toggle("full",on);
+            document.body.style.overflow=on?"hidden":"";
+            b.textContent=on?"✕":"⤢";
+            b.setAttribute("aria-pressed",on);
+            b.setAttribute("aria-label",on?"Exit full screen":"Full screen map");
+            if(LM)setTimeout(()=>LM.invalidateSize(),50);
+            if(!on)syncListHeight();
+        }
+        b.onclick=()=>set(!w.classList.contains("full"));
+        document.addEventListener("keydown",e=>{if(e.key==="Escape"&&w.classList.contains("full"))set(false)});
+    })();
+</script>
+<script>
+    (function(){
+        let W=null;
+        const prev=drawList;
+        drawList=function(vis){
+            prev(vis);
+            if(!W)return;
+            document.querySelectorAll("#list .item").forEach(li=>{
+                const w=W[+li.dataset.i];
+                if(!w||li.querySelector(".temp"))return;
+                const t=document.createElement("span");
+                t.className="temp";
+                t.textContent=Math.round(w.now)+"°C";
+                t.title="Current temperature";
+                li.querySelector(".eta").after(t);
+                const more=li.querySelector(".more p");
+                if(more){
+                    const p=document.createElement("p");
+                    p.innerHTML="<b>Today:</b> high "+Math.round(w.hi)+"°C, low "+Math.round(w.lo)+"°C";
+                    more.before(p);
+                }
+            });
+        };
+        async function load(){
+            try{
+                const url="https://api.open-meteo.com/v1/forecast?latitude="+D.map(d=>d[3]).join(",")+
+                    "&longitude="+D.map(d=>d[4]).join(",")+
+                    "&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1";
+                const r=await fetch(url);
+                if(!r.ok)throw new Error(r.status);
+                const j=await r.json(),a=Array.isArray(j)?j:[j];
+                W=a.map(x=>({now:x.current.temperature_2m,hi:x.daily.temperature_2m_max[0],lo:x.daily.temperature_2m_min[0]}));
+                render();
+            }catch(e){console.warn("Weather unavailable",e)}
+        }
+        load();
+        setInterval(load,30*60*1000);
+    })();
+</script>
+</body>
+</html>
+{% endraw %}
